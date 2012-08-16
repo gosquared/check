@@ -7,7 +7,33 @@ module Check
   class MissingNameError < StandardError; end
 
   class Metric < Hashr
-    define(Check.metric_defaults)
+    DEFAULTS = {
+      lower:                  1,
+      upper:                  10,
+      positives:              2,
+      over_seconds:           60,
+      suspend_after:          1,
+      suspend_for:            1800
+    }
+    define(DEFAULTS)
+
+    # In this example, we are overwriting the defaults so that all new
+    # configs will consider 5 positives over a period of 60 seconds to
+    # be a match.  The metric check will be suspended for 1h after 3
+    # positive matches.
+    #
+    #   Check::Metric.defaults = {
+    #     lower:          10,
+    #     upper:          100,
+    #     positives:      5,
+    #     over_seconds:   60,
+    #     suspend_after:  3,
+    #     suspend_for:    3600
+    #   }
+    #
+    def self.defaults=(params)
+      define(params)
+    end
 
     def set
       return @set if @set

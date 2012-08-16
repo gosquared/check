@@ -12,6 +12,14 @@ module Check
       Metric.new.wont_have :valid_name?
     end
 
+    it "defaults can be overwritten" do
+      Metric.new.must_equal Metric::DEFAULTS
+      Metric.defaults = { foo: "bar"}
+      Metric.new.must_equal({ foo: "bar" })
+      # Don't forget to reset this back...
+      Metric.defaults = Metric::DEFAULTS
+    end
+
     it "accepts custom attributes" do
       emails = %w[foo@bar.com foo2@bar.com]
       metric = Metric.new(:name => "foo", :email => emails)
@@ -25,12 +33,21 @@ module Check
       metric.similar.map(&:lower).must_equal [1]
     end
 
+    it "updating a metric saves it as a new one" do
+      metric = Metric.new(:name => "foo")
+      metric.save
+      metric.similar.map(&:lower).must_equal [Metric::DEFAULTS[:lower]]
+      metric.lower = 5
+      metric.save
+      (metric.similar.map(&:lower) - [1, 5]).must_equal []
+    end
+
     it "groups similar" do
       Metric.new(:name => "foo", :lower => 1).save
       metric = Metric.new(:name => "foo", :lower => 10)
       metric.similar.map(&:lower).must_equal [1]
       metric.save
-      metric.similar.map(&:lower).must_equal [1, 10]
+      (metric.similar.map(&:lower) - [1, 10]).must_equal []
     end
 
     it "deletes one" do
