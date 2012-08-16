@@ -13,9 +13,10 @@ def stop_test_redis_server
     sock=/tmp/redis-check-test.sock
     if [ -e $pid ]; then
       cat $pid | xargs kill -QUIT
-      rm -f #{PWD}/dump.rdb
       rm -f $pid
       rm -f $sock
     fi
   }
 end
+
+start_test_redis_server

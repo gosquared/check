@@ -4,16 +4,14 @@ require 'hashr'
 require 'redis/set'
 
 module Check
-  class MissingNameError < StandardError; end
-
   class Metric < Hashr
     DEFAULTS = {
-      lower:                  1,
-      upper:                  10,
-      positives:              2,
-      over_seconds:           60,
-      suspend_after:          1,
-      suspend_for:            1800
+      lower: 1,
+      upper: 10,
+      positives: 2,
+      over_seconds: 60,
+      suspend_after: 1,
+      suspend_for: 1800
     }
     define(DEFAULTS)
 
@@ -23,16 +21,20 @@ module Check
     # positive matches.
     #
     #   Check::Metric.defaults = {
-    #     lower:          10,
-    #     upper:          100,
-    #     positives:      5,
-    #     over_seconds:   60,
-    #     suspend_after:  3,
-    #     suspend_for:    3600
+    #     lower: 10,
+    #     upper: 100,
+    #     positives: 5,
+    #     over_seconds: 60,
+    #     suspend_after: 3,
+    #     suspend_for: 3600
     #   }
     #
     def self.defaults=(params)
       define(params)
+    end
+
+    def self.delete_all(name)
+      Redis.current.del(name)
     end
 
     def set
@@ -65,12 +67,6 @@ module Check
 
     def persisted?
       set.member?(self.to_hash)
-    end
-
-    class << self
-      def delete_all(name)
-        Redis.current.del(name)
-      end
     end
   end
 end

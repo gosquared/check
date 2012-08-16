@@ -22,19 +22,19 @@ module Check
 
     it "accepts custom attributes" do
       emails = %w[foo@bar.com foo2@bar.com]
-      metric = Metric.new(:name => "foo", :email => emails)
+      metric = Metric.new(name: "foo", email: emails)
       metric[:email].must_equal emails
     end
 
     it "doesn't create duplicates" do
-      Metric.new(:name => "foo", :lower => 1).save
-      metric = Metric.new(:name => "foo", :lower => 1)
+      Metric.new(name: "foo", lower: 1).save
+      metric = Metric.new(name: "foo", lower: 1)
       metric.save
       metric.similar.map(&:lower).must_equal [1]
     end
 
     it "updating a metric saves it as a new one" do
-      metric = Metric.new(:name => "foo")
+      metric = Metric.new(name: "foo")
       metric.save
       metric.similar.map(&:lower).must_equal [Metric::DEFAULTS[:lower]]
       metric.lower = 5
@@ -43,16 +43,16 @@ module Check
     end
 
     it "groups similar" do
-      Metric.new(:name => "foo", :lower => 1).save
-      metric = Metric.new(:name => "foo", :lower => 10)
+      Metric.new(name: "foo", lower: 1).save
+      metric = Metric.new(name: "foo", lower: 10)
       metric.similar.map(&:lower).must_equal [1]
       metric.save
       (metric.similar.map(&:lower) - [1, 10]).must_equal []
     end
 
     it "deletes one" do
-      Metric.new(:name => "foo", :lower => 2).save
-      metric = Metric.new(:name => "foo", :lower => 1)
+      Metric.new(name: "foo", lower: 2).save
+      metric = Metric.new(name: "foo", lower: 1)
       metric.save
       metric.must_be :persisted?
       metric.delete
@@ -61,11 +61,11 @@ module Check
     end
 
     it "deletes all" do
-      Metric.new(:name => "foo", :lower => 1).save
-      Metric.new(:name => "foo", :lower => 2).save
+      Metric.new(name: "foo", lower: 1).save
+      Metric.new(name: "foo", lower: 2).save
 
       Metric.delete_all("foo")
-      Metric.new(:name => "foo").similar.size.must_equal 0
+      Metric.new(name: "foo").similar.size.must_equal 0
     end
   end
 end

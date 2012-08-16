@@ -1,9 +1,14 @@
+#!/usr/bin/env ruby
+
 require 'bundler/setup'
-
-require 'pry'
 require 'awesome_print'
+require 'pry'
 
-def exemplify(description, object)
+require_relative '../test/support/redis'
+
+def exemplify(description, object=false)
   puts "\n::: #{description} ".ljust(50, ":::")
-  ap object, indent: -2
+  ap(object, indent: -2) if object
 end
+
+at_exit { stop_test_redis_server }
