@@ -7,14 +7,7 @@ module Check
   class MissingNameError < StandardError; end
 
   class Metric < Hashr
-    define({
-      lower:                  0,
-      upper:                  0,
-      checks:                 1,
-      over_seconds:           60,
-      suspend_after_matches:  5,
-      suspend_for:            600
-    })
+    define(Check.metric_defaults)
 
     def set
       return @set if @set
