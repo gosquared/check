@@ -72,9 +72,7 @@ module Check
     end
 
     def delete
-      delete_matches
-      delete_positives
-      delete_disable
+      delete_associated
       set.delete(self.to_hash)
     end
 
@@ -116,8 +114,8 @@ module Check
       @positives = Redis::List.new(positives_key, maxlength: self.fetch(:keep_positives), marshal: true)
     end
 
-    def delete_positives
-      Redis.current.del(positives_key)
+    def delete_associated
+      Redis.current.del([matches_key, positives_key, disable_key])
     end
 
     def suspended?(timestamp=Time.now.utc.to_i)
