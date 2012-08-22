@@ -15,10 +15,4 @@ module Check
     db:      Check::REDIS_DB,
     driver:  :hiredis
   )
-
-  def metric(params)
-    Metric.find(params).similar.each do |m|
-      m.check(params)
-    end
-  end
 end
