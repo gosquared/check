@@ -6,7 +6,7 @@ require_relative 'check/version'
 module Check
   extend self
 
-  # this can be either redis:// or unix://
+  # Can be either redis:// or unix://
   REDIS_URI = ENV.fetch('REDIS_URI') { "redis://localhost:6379" }
   REDIS_DB  = ENV.fetch('REDIS_DB') { 0 }.to_i
 
@@ -16,7 +16,9 @@ module Check
     driver:  :hiredis
   )
 
-  def metric
-    # metric checking...
+  def metric(params)
+    Metric.find(params).similar.each do |m|
+      m.check(params)
+    end
   end
 end

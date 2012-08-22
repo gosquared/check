@@ -7,31 +7,30 @@ metric_check = Check::Metric.new(
   name: "metric1",
   lower: 5,
   upper: 10,
-  positives: 1,
-  suspend_after: 1,
-  suspend_for: 60
-)
-metric_check.save
+  matches_for_positive: 2,
+  suspend_after_positives: 1,
+  suspend_for_seconds: 60
+).save
 
-exemplify("Metric check matches")
-puts "Default matches: #{metric_check.matches}"
-Check.metric(name: "metric1", lower: 4)
-puts "Matches after new positive: #{metric_check.matches}"
+exemplify("Default metric check matches", metric_check.matches.values)
 
-exemplify("Suspending/unsuspending metric checks")
-puts "Now that we had 1 positive matches, is this metric checking suspended? #{metric_check.suspended?}"
-puts "New positives will be ignored."
-Check.metric(name: "metric1", lower: 3)
-puts "Matches after new positive: #{metric_check.matches}"
-puts "Metric checking manually unsuspended. #{metric_check.unsuspend!}"
-Check.metric(name: "metric1", lower: 2)
-puts "Matches after new positive: #{metric_check.matches}"
+Check.metric(name: "metric1", value: 4)
+exemplify("Metric check matches after first match", metric_check.matches.values)
+exemplify("Is this metric checking suspended?", metric_check.suspended?)
 
-exemplify("Disabling/enabling metric checks")
-puts "Metric checks can be disabled. #{metric_check.disable!}"
-puts "New positives will be ignored."
-Check.metric(name: "metric1", lower: 1)
-puts "Matches after new positive: #{metric_check.matches}"
-puts "Metric checking has been enabled. #{metric_check.enable!}"
-Check.metric(name: "metric1", lower: 0)
-puts "Matches after new positive: #{metric_check.matches}"
+Check.metric(name: "metric1", value: 3)
+exemplify("Metric check matches after second match", metric_check.matches.values)
+exemplify("Metric check positives after second match", metric_check.positives.values)
+exemplify("Is this metric checking suspended?", metric_check.suspended?)
+
+Check.metric(name: "metric1", value: 2)
+exemplify("As the metric check is suspended, new matches will be ignored", metric_check.matches.values)
+exemplify("Deleting all positives will unsuspend it", metric_check.delete_positives)
+
+exemplify("Metric checking manually disabled", metric_check.disable!)
+Check.metric(name: "metric1", value: 1)
+exemplify("As the metric check is disabled, New matches will be ignored", metric_check.matches.values)
+
+exemplify("Metric checking manually enabled", metric_check.enable!)
+Check.metric(name: "metric1", value: 0)
+exemplify("New matches no longer ignored", metric_check.matches.values)

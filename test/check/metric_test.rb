@@ -9,15 +9,9 @@ module Check
     end
 
     it "must have a name" do
-      Metric.new.wont_have :valid_name?
-    end
-
-    it "defaults can be overwritten" do
-      Metric.new.must_equal Metric::DEFAULTS
-      Metric.defaults = { foo: "bar"}
-      Metric.new.must_equal({ foo: "bar" })
-      # Don't forget to reset this back...
-      Metric.defaults = Metric::DEFAULTS
+      Metric.new.wont_be :valid_name?
+      Metric.new(name: " ").wont_be :valid_name?
+      Metric.new(name: "foo").must_be :valid_name?
     end
 
     it "accepts custom attributes" do
@@ -26,46 +20,180 @@ module Check
       metric[:email].must_equal emails
     end
 
-    it "doesn't create duplicates" do
-      Metric.new(name: "foo", lower: 1).save
-      metric = Metric.new(name: "foo", lower: 1)
-      metric.save
-      metric.similar.map(&:lower).must_equal [1]
+    describe "#save" do
+      it "doesn't create duplicates" do
+        Metric.new(name: "foo", lower: 1).save
+        metric = Metric.new(name: "foo", lower: 1).save
+        metric.similar.map(&:lower).must_equal [1]
+      end
+
+      it "updating a metric saves it as a new one" do
+        metric = Metric.new(name: "foo").save
+        metric.similar.map(&:lower).must_equal [Metric.defaults[:lower]]
+        metric.lower = 5
+        metric.save
+        (metric.similar.map(&:lower) - [1, 5]).must_equal []
+      end
     end
 
-    it "updating a metric saves it as a new one" do
-      metric = Metric.new(name: "foo")
-      metric.save
-      metric.similar.map(&:lower).must_equal [Metric::DEFAULTS[:lower]]
-      metric.lower = 5
-      metric.save
-      (metric.similar.map(&:lower) - [1, 5]).must_equal []
+    describe "#similar" do
+      it "returns all metric checks with the same name" do
+        Metric.new(name: "foo", lower: 1).save
+        metric = Metric.new(name: "foo", lower: 10)
+        metric.similar.map(&:lower).must_equal [1]
+        metric.save
+        (metric.similar.map(&:lower) - [1, 10]).must_equal []
+      end
     end
 
-    it "groups similar" do
-      Metric.new(name: "foo", lower: 1).save
-      metric = Metric.new(name: "foo", lower: 10)
-      metric.similar.map(&:lower).must_equal [1]
-      metric.save
-      (metric.similar.map(&:lower) - [1, 10]).must_equal []
+    describe "#check" do
+      before do
+        @metric = Metric.new(
+          name: "foo",
+          lower: 5,
+          upper: 10,
+          matches_for_positive: 2,
+          over_seconds: 60,
+          suspend_after_positives: 1,
+          suspend_for_seconds: 2
+        ).save
+      end
+
+      it "stores matches" do
+        @metric.matches.length.must_equal 0
+        @metric.check({name: "foo", value: 4})
+        @metric.matches.length.must_equal 1
+      end
+
+      it "matches don't grow past matches_for_positive" do
+        3.times { |value| @metric.check({name: "foo", value: value}) }
+        @metric.matches.length.must_be :<=, @metric[:matches_for_positive]
+      end
+
+      describe "when values are between lower & upper bounds" do
+        it "no matches get recorded" do
+          (5..10).each { |value| @metric.check({name: "foo", value: value}) }
+          @metric.matches.length.must_equal 0
+        end
+      end
+
+      describe "when values are outside lower & upper bounds" do
+        describe "when new matches are within over_seconds period" do
+          it "a new positive gets created and matching gets suspended" do
+            (10..13).each { |value| @metric.check({name: "foo", value: value}) }
+            @metric.positives.length.must_equal 1
+            # matching gets suspended for :suspend_for_seconds after a positive
+            @metric.must_be :suspended?
+            @metric.matches.length.must_equal 0
+          end
+        end
+      end
+
+      describe "multiple metric checks" do
+        it "checks against all persisted checks" do
+          metric = Metric.new(
+            name: "foo",
+            lower: 1,
+            matches_for_positive: 1
+          ).save
+          metric.check({name: "foo", value: 0})
+          metric.matches.length.must_equal 0
+          metric.positives.length.must_equal 1
+          @metric.matches.length.must_equal 1
+          @metric.positives.length.must_equal 0
+        end
+      end
     end
 
-    it "deletes one" do
-      Metric.new(name: "foo", lower: 2).save
-      metric = Metric.new(name: "foo", lower: 1)
-      metric.save
-      metric.must_be :persisted?
-      metric.delete
-      metric.wont_be :persisted?
-      metric.similar.map(&:lower).must_equal [2]
+    describe "disable/enable" do
+      before do
+        @metric = Metric.new(
+          name: "foo",
+          lower: 5
+        ).save
+      end
+
+      describe "by default" do
+        it "is not disabled" do
+          @metric.wont_be :disabled?
+        end
+
+        it "matches are not ignored" do
+          @metric.check({name: "foo", value: 1})
+          @metric.matches.length.must_equal 1
+        end
+      end
+
+      describe "when it is disabled" do
+        it "new matches are ignored" do
+          @metric.disable!
+          @metric.must_be :disabled?
+          @metric.check({name: "foo", value: 1})
+          @metric.matches.length.must_equal 0
+          @metric.enable!
+          @metric.wont_be :disabled?
+        end
+      end
     end
 
-    it "deletes all" do
-      Metric.new(name: "foo", lower: 1).save
-      Metric.new(name: "foo", lower: 2).save
+    describe "#delete" do
+      before do
+        @metric = Metric.new(name: "foo", lower: 2).save
+      end
 
-      Metric.delete_all("foo")
-      Metric.new(name: "foo").similar.size.must_equal 0
+      it "deletes itself from the metric checks with the same name" do
+        metric = Metric.new(name: "foo", lower: 1).save
+        metric.must_be :persisted?
+        metric.delete
+        metric.wont_be :persisted?
+        metric.similar.must_equal [@metric.to_hash]
+      end
+
+      it "deletes all matches" do
+        @metric.check({name: "foo", value: 1})
+        Redis.current.must_be :exists, @metric.matches_key
+        @metric.delete
+        Redis.current.wont_be :exists, @metric.matches_key
+      end
+
+      it "deletes all positives" do
+        2.times { |value| @metric.check({name: "foo", value: value}) }
+        Redis.current.must_be :exists, @metric.positives_key
+        @metric.delete
+        Redis.current.wont_be :exists, @metric.positives_key
+      end
+
+      it "deletes disable" do
+        @metric.disable!
+        @metric.delete
+        Redis.current.wont_be :exists, @metric.disable_key
+      end
+    end
+
+    describe ".defaults" do
+      it "overwrite default values" do
+        Metric.new.must_equal Metric.defaults
+        Metric.defaults = { foo: "bar"}
+        metric = Metric.new
+        metric.fetch(:foo).must_equal "bar"
+        metric.first.must_equal Metric.defaults.first
+      end
+    end
+
+    describe ".find" do
+      it "behaves like new" do
+        Metric.find.must_equal Metric.new
+      end
+    end
+
+    describe ".delete_all" do
+      it "deletes all metric checks" do
+        Metric.new(name: "foo", lower: 1).save
+        Metric.new(name: "foo", lower: 2).save
+
+        Metric.delete_all("foo")
+        Metric.new(name: "foo").similar.size.must_equal 0
+      end
     end
   end
 end
