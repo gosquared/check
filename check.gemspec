@@ -18,8 +18,10 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.version       = Check::VERSION
 
+  gem.add_runtime_dependency "grape", "~> 0.2.1"
   gem.add_runtime_dependency "hashr", "~> 0.0.21"
   gem.add_runtime_dependency "hiredis", "~> 0.4.5"
   gem.add_runtime_dependency "redis", "~> 3.0.1"
   gem.add_runtime_dependency "redis-objects", "~> 0.5.3"
+  gem.add_runtime_dependency "unicorn", "~> 4.3.1"
 end
