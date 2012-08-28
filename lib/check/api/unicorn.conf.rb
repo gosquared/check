@@ -1,14 +1,3 @@
-BASEDIR = File.expand_path('../../../')
-
-root = BASEDIR
-
-# Sample verbose configuration file for Unicorn (not Rack)
-#
-# This configuration file documents many features of Unicorn
-# that may not be needed for some applications. See
-# http://unicorn.bogomips.org/examples/unicorn.conf.minimal.rb
-# for a much simpler configuration file.
-#
 # See http://unicorn.bogomips.org/Unicorn/Configurator.html for complete
 # documentation.
 
@@ -21,26 +10,39 @@ worker_processes ENV.fetch('CHECK_UNICORN_WORKERS') { 1 }
 # as root unless it's from system init scripts.
 # If running the master process as root and the workers as an unprivileged
 # user, do this to switch euid/egid in the workers (also chowns logs):
-# user "unprivileged_user", "unprivileged_group"
-
-# Help ensure your application will always spawn in the symlinked
-# "current" directory that Capistrano sets up.
-#working_directory "#{BASEDIR}/lib/api" # available in 0.94.0+
+user ENV.fetch('CHECK_API_USER') { ENV['USER'] }, ENV.fetch('CHECK_API_GROUP') { nil }
 
 # listen on both a Unix domain socket and a TCP port,
-# we use a shorter backlog for quicker failover when busy
-listen ENV.fetch('CHECK_UNICORN_TCP_PORT') { 9000 }, tcp_nopush: true
+#
+# The backlog is for the listen() syscall.
+# Some operating systems allow negative values here to specify the
+# maximum allowable value. In most cases, this number is only
+# recommendation and there are other OS-specific tunables and variables
+# that can affect this number. See the listen(2) syscall documentation
+# of your OS for the exact semantics of this.
+# The shorter backlog ensures quicker failover when busy, and helps the
+# load balancer spread requests evenly.
+listen ENV.fetch('CHECK_UNICORN_TCP_PORT') { 9000 }, backlog: ENV.fetch('CHECK_UNICORN_BACKLOG') { 128 }.to_i
+listen ENV.fetch('CHECK_UNICORN_UNIX_SOCKET') { '/tmp/check_api.sock' }, backlog: ENV.fetch('CHECK_UNICORN_BACKLOG') { 128 }.to_i
 
-listen ENV.fetch('CHECK_UNICORN_UNIX_SOCKET') { '/tmp/check_api.sock' }, backlog: 64
+# Sets the timeout of worker processes to seconds. Workers handling the
+# request/app.call/response cycle taking longer than this time period
+# will be forcibly killed (via SIGKILL). This timeout is enforced by the
+# master process itself and not subject to the scheduling limitations by
+# the worker process. Due the low-complexity, low-overhead
+# implementation, timeouts of less than 3.0 seconds can be considered
+# inaccurate and unsafe.
+# For running Unicorn behind nginx, it is recommended to set
+# "fail_timeout=0" for in your nginx configuration like this to have
+# nginx always retry backends that may have had workers SIGKILL-ed due
+# to timeouts.
+timeout ENV.fetch('CHECK_UNICORN_TIMEOUT') { 30 }
 
-# nuke workers after 30 seconds instead of 60 seconds (the default)
-timeout ENV.fetch('CHECK_UNICORN_TIMEOUT') { 60 }
-
-# feel free to point this anywhere accessible on the filesystem
-pid ENV.fetch('CHECK_UNICORN_PID') { "/tmp/check_api.pid" }
+# PID of the unicorn master process
+pid ENV.fetch('CHECK_UNICORN_PID') { '/tmp/check_api.pid' }
 
 # By default, the Unicorn logger will write to stderr.
-# Additionally, ome applications/frameworks log to stderr or stdout,
+# Additionally, some applications/frameworks log to stderr or stdout,
 # so prevent them from going to /dev/null when daemonized here:
-# stderr_path "/path/to/app/shared/log/unicorn.stderr.log"
-# stdout_path "/path/to/app/shared/log/unicorn.stdout.log"
+stderr_path ENV.fetch('CHECK_UNICORN_STDERR') { $STDERR }
+stdout_path ENV.fetch('CHECK_UNICORN_STDOUT') { $STDOUT }

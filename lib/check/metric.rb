@@ -187,8 +187,19 @@ module Check
       end
     end
 
+    def errors
+      return @errors if @errors
+      @errors = {}
+    end
+
     def valid_name?
-      !!(self.fetch(:name) { "" }.strip != "")
+      if (self.fetch(:name) { "" }.strip != "")
+        errors.delete(:name)
+        return true
+      else
+        errors[:name] = "can't be blank"
+        return false
+      end
     end
 
     def valid?

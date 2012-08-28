@@ -1,5 +1,8 @@
+require 'bundler/setup'
+
 require 'pry'
 require 'ap'
+require 'rack/test'
 require 'turn/autorun'
 
 APP_ROOT = File.expand_path('../../', __FILE__)
