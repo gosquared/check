@@ -23,16 +23,17 @@ module Check
     describe "#save" do
       it "doesn't create duplicates" do
         Metric.new(name: "foo", lower: 1).save
-        metric = Metric.new(name: "foo", lower: 1).save
-        metric.similar.map(&:lower).must_equal [1]
+        2.times { Metric.new(name: "foo", lower: 1).save }
+        Redis.current.keys.size.must_equal 1
+        Metric.find(name: "foo").similar.size.must_equal 1
       end
 
       it "updating a metric saves it as a new one" do
         metric = Metric.new(name: "foo").save
-        metric.similar.map(&:lower).must_equal [Metric.defaults[:lower]]
+        metric.similar.size.must_equal 1
         metric.lower = 5
         metric.save
-        (metric.similar.map(&:lower) - [1, 5]).must_equal []
+        metric.similar.size.must_equal 2
       end
     end
 
@@ -183,6 +184,12 @@ module Check
     describe ".find" do
       it "behaves like new" do
         Metric.find.must_equal Metric.new
+      end
+
+      it "doesn't create duplicates" do
+        Metric.new(name: "foo").save
+        metric = Metric.find(name: "foo")
+        metric.similar.size.must_equal 1
       end
     end
 

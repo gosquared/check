@@ -4,6 +4,7 @@ require 'hashr'
 require 'redis/set'
 require 'redis/list'
 require 'redis/value'
+require 'msgpack'
 
 module Check
   class Metric < Hashr
@@ -56,24 +57,32 @@ module Check
 
     def set
       return @set if @set
-
-      @set = Redis::Set.new(self.fetch(:name), marshal: true) if valid_name?
+      @set = Redis::Set.new(self.fetch(:name)) if valid_name?
     end
 
     def similar
       set.members.map do |member|
-        Metric.new(member)
+        Metric.new(unpack(member))
       end
     end
 
+    def pack
+      self.to_hash.to_msgpack
+    end
+    alias :packed :pack
+
+    def unpack(value)
+      MessagePack.unpack(value)
+    end
+
     def save
-      set.add(self.to_hash) if valid?
+      set.add(packed) if valid?
       self
     end
 
     def delete
       delete_associated
-      set.delete(self.to_hash)
+      set.delete(packed)
     end
 
     def id
@@ -98,7 +107,6 @@ module Check
 
     def matches
       return @matches if @matches
-
       @matches = Redis::List.new(matches_key, maxlength: self.fetch(:matches_for_positive), marshal: true)
     end
 
@@ -110,7 +118,6 @@ module Check
 
     def positives
       return @positives if @positives
-
       @positives = Redis::List.new(positives_key, maxlength: self.fetch(:keep_positives), marshal: true)
     end
 
@@ -130,7 +137,6 @@ module Check
 
     def disable
       return @disable if @disable
-
       @disable = Redis::Value.new(disable_key, marshal: true)
     end
 
@@ -190,7 +196,7 @@ module Check
     end
 
     def persisted?
-      set.member?(self.to_hash)
+      set.include?(packed)
     end
   end
 end
