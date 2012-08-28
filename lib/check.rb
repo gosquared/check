@@ -7,8 +7,8 @@ module Check
   extend self
 
   # Can be either redis:// or unix://
-  REDIS_URI = ENV.fetch('REDIS_URI') { "redis://localhost:6379" }
-  REDIS_DB  = ENV.fetch('REDIS_DB') { 0 }.to_i
+  REDIS_URI = ENV.fetch('CHECK_REDIS_URI') { "redis://localhost:6379" }
+  REDIS_DB  = ENV.fetch('CHECK_REDIS_DB') { 0 }.to_i
 
   Redis.current = Redis.new(
     url:     Check::REDIS_URI,

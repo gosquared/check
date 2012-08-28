@@ -1,4 +1,4 @@
-ENV['REDIS_URI'] = "unix:///tmp/redis-check-test.sock"
+ENV['CHECK_REDIS_URI'] = "unix:///tmp/redis-check-test.sock"
 
 PWD = File.expand_path('../', __FILE__)
 
