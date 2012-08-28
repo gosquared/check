@@ -38,9 +38,15 @@ NB: you will need to have all gems in `development` group installed.
 ## API
 
 The gem comes with a self-contained API. It's powered by grape and
-it includes a config.ru and unicorn.conf. Unicorn is **not** declared as
-a dependency, feel free to choose whichever ruby web server you prefer
-in the service implementing this gem.
+it includes a config.ru and unicorn.conf (check the examples folder).
+
+Unicorn is **not** declared as a dependency, feel free to choose
+whichever ruby web server you prefer in the service implementing this
+gem.
+
+If you have the gem repository cloned and want to test out the API:
+
+    unicorn -c examples/unicorn.conf.rb examples/config.ru
 
 ## Contributing
 
