@@ -12,7 +12,7 @@ Gem::Specification.new do |gem|
   gem.summary       = 'Data stream monitor'
   gem.homepage      = 'https://github.com/gosquared/osprey'
 
-  gem.files         = Dir['lib/**/*', 'Gemfile', 'README.md']
+  gem.files         = Dir['lib/**/*', 'examples/**/*', 'benchmarks/**/*', 'Gemfile', 'README.md']
   gem.test_files    = Dir['test/**/*']
   gem.name          = 'check'
   gem.require_paths = ['lib']
@@ -23,4 +23,9 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency 'msgpack', '~> 0.4.7'
   gem.add_runtime_dependency 'redis', '~> 3.0.1'
   gem.add_runtime_dependency 'redis-objects', '~> 0.5.3'
+
+  ## API
+  gem.add_runtime_dependency 'grape', '~> 0.2.1'
+  # Requires some fixes first, check the api.rb for more info.
+  # gem.add_runtime_dependency 'grape-swagger', '~> 0.2.1'
 end

@@ -15,10 +15,6 @@ And then run:
 
     $ bundle
 
-Don't forget to leave the groups which you don't want/need out:
-
-    $ bundle install --without check_api
-
 Or install it yourself as:
 
     $ gem install check
@@ -29,7 +25,7 @@ Check the examples directory. To run a specific example:
 
     $ ruby examples/metric_check.rb
 
-NB: you will need to have all gems in `check_development` group installed.
+NB: you will need to have all gems in `development` group installed.
 
 ## Benchmarks
 
@@ -37,7 +33,7 @@ Check the benchmarks directory. To run a specific benchmark:
 
     $ ruby benchmarks/metric_check.rb
 
-NB: you will need to have all gems in `check_development` group installed.
+NB: you will need to have all gems in `development` group installed.
 
 ## API
 
@@ -45,9 +41,6 @@ The gem comes with a self-contained API. It's powered by grape and
 it includes a config.ru and unicorn.conf. Unicorn is **not** declared as
 a dependency, feel free to choose whichever ruby web server you prefer
 in the service implementing this gem.
-
-All API dependencies have been declared in a separate group, you can
-always `bundle install --without check_api`.
 
 ## Contributing
 
