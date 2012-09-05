@@ -8,10 +8,15 @@ module Check
       Redis.current.flushdb
     end
 
-    it "must have a name" do
-      Metric.new.wont_be :valid_name?
-      Metric.new(name: " ").wont_be :valid_name?
-      Metric.new(name: "foo").must_be :valid_name?
+    describe "name" do
+      it "must be present" do
+        Metric.new.wont_be :valid_name?
+        Metric.new(name: "foo").must_be :valid_name?
+      end
+
+      it "cannot be empty string" do
+        Metric.new(name: " ").wont_be :valid_name?
+      end
     end
 
     it "accepts custom attributes" do
