@@ -5,6 +5,8 @@ require 'msgpack'
 module Check
   class Notifications
     def initialize(redis_notifications=REDIS_NOTIFICATIONS)
+      shutdown_gracefully
+
       Redis.current.subscribe(redis_notifications) do |on|
         if block_given?
           yield(on)
@@ -19,7 +21,7 @@ module Check
     def on_subscribe
       Proc.new do |on|
         on.subscribe do |channel, subscriptions|
-          puts "Subscribed to ##{channel} (#{subscriptions} subscriptions)"
+          puts "Subscribed to #{channel} (#{subscriptions} subscriptions)"
         end
       end
     end
@@ -37,6 +39,20 @@ module Check
         on.unsubscribe do |channel, subscriptions|
           puts "Unsubscribed from ##{channel} (#{subscriptions} subscriptions)"
         end
+      end
+    end
+
+    def shutdown_gracefully
+      Signal.trap "SIGTERM", shutdown
+      Signal.trap "SIGINT", shutdown
+      Signal.trap "SIGQUIT", shutdown
+    end
+
+    def shutdown
+      Proc.new do
+        Redis.current.disconnect
+        puts "\n#{self.class} shutting down..."
+        exit 0
       end
     end
   end
