@@ -159,8 +159,12 @@ module Check
       end
     end
 
+    def notify?
+      REDIS_NOTIFICATIONS.strip != ""
+    end
+
     def notify(message)
-      Redis.current.publish(REDIS_NOTIFICATIONS, message.to_msgpack)
+      Redis.current.publish(REDIS_NOTIFICATIONS, message.to_msgpack) if notify?
     end
 
     def check(params)

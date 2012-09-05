@@ -59,6 +59,14 @@ module Check
       end
     end
 
+    describe "#notify?" do
+      it "disabled if REDIS_NOTIFICATIONS is an empty string" do
+        ENV['CHECK_REDIS_NOTIFICATIONS'] = ""
+        load 'check.rb' # pardon the shouty CONSTANTS...
+        Metric.new(name: "foo").wont_be :notify?
+      end
+    end
+
     describe "#check" do
       before do
         @metric = Metric.new(
