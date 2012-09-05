@@ -29,7 +29,7 @@ exemplify("Deleting all positives will unsuspend it", metric.delete_positives)
 
 exemplify("Metric checking manually disabled", metric.disable!)
 metric.check(value: 1)
-exemplify("As the metric check is disabled, New matches will be ignored", metric.matches.values)
+exemplify("As the metric check is disabled, new matches will be ignored", metric.matches.values)
 
 exemplify("Metric checking manually enabled", metric.enable!)
 metric.check(value: 0)
