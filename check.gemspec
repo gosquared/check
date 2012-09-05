@@ -12,7 +12,7 @@ Gem::Specification.new do |gem|
   gem.summary       = 'Data stream monitor'
   gem.homepage      = 'https://github.com/gosquared/osprey'
 
-  gem.files         = Dir['lib/**/*', 'examples/**/*', 'benchmarks/**/*', 'Gemfile', 'README.md']
+  gem.files         = Dir['lib/**/*', 'examples/**/*', 'benchmarks/**/*', 'Gemfile', 'check.gemspec', 'Rakefile', 'README.md', 'LICENSE']
   gem.test_files    = Dir['test/**/*']
   gem.name          = 'check'
   gem.require_paths = ['lib']
