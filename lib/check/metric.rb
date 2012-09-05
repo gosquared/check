@@ -56,8 +56,7 @@ module Check
     end
 
     def set
-      return @set if @set
-      @set = Redis::Set.new(self.fetch(:name)) if valid_name?
+      Redis::Set.new(self.fetch(:name)) if valid_name?
     end
 
     def similar
@@ -106,8 +105,7 @@ module Check
     end
 
     def matches
-      return @matches if @matches
-      @matches = Redis::List.new(matches_key, maxlength: self.fetch(:matches_for_positive), marshal: true)
+      Redis::List.new(matches_key, maxlength: self.fetch(:matches_for_positive), marshal: true)
     end
 
     def delete_matches
@@ -117,8 +115,7 @@ module Check
     alias :clear_matches :delete_matches
 
     def positives
-      return @positives if @positives
-      @positives = Redis::List.new(positives_key, maxlength: self.fetch(:keep_positives), marshal: true)
+      Redis::List.new(positives_key, maxlength: self.fetch(:keep_positives), marshal: true)
     end
 
     def delete_associated
@@ -136,8 +133,7 @@ module Check
     end
 
     def disable
-      return @disable if @disable
-      @disable = Redis::Value.new(disable_key, marshal: true)
+      Redis::Value.new(disable_key, marshal: true)
     end
 
     def disable!

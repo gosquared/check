@@ -35,6 +35,13 @@ module Check
         metric.save
         metric.similar.size.must_equal 2
       end
+
+      it "updating a metric name saves it as a new one" do
+        metric = Metric.new(name: "foo").save
+        metric.name = "bar"
+        metric.save
+        Redis.current.keys.must_equal %w[foo bar]
+      end
     end
 
     describe "#similar" do
