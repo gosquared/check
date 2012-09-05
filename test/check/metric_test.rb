@@ -92,13 +92,23 @@ module Check
 
       describe "when values are outside lower & upper bounds" do
         describe "when new matches are within over_seconds period" do
-          it "a new positive gets created and matching gets suspended" do
+          before do
+            #binding.pry
+            # $ redis-cli -s /tmp/redis-check-test.sock subscribe check_notifications
             (10..13).each { |value| @metric.check({name: "foo", value: value}) }
+          end
+
+          it "a new positive gets created" do
             @metric.positives.length.must_equal 1
-            # matching gets suspended for :suspend_for_seconds after a positive
+          end
+
+          it "and matching gets suspended for :suspend_for_seconds" do
             @metric.must_be :suspended?
             @metric.matches.length.must_equal 0
           end
+
+          # Check the before for tips on a quick, manual test
+          it "sends pub/sub notification"
         end
       end
 

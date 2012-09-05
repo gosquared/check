@@ -159,6 +159,10 @@ module Check
       end
     end
 
+    def notify(message)
+      Redis.current.publish(REDIS_NOTIFICATIONS, message.to_msgpack)
+    end
+
     def check(params)
       timestamp = params.fetch(:timestamp) { Time.now.utc }.to_i
       value = params.fetch(:value)
@@ -174,10 +178,12 @@ module Check
         end
 
         if metric.trigger_positive?
-          metric.positives.push({
+          new_positive = {
             timestamp: metric.matches.last.fetch(:timestamp),
             matches: metric.matches.values
-          })
+          }
+          metric.positives.push(new_positive)
+          notify(new_positive.merge(metric))
           metric.clear_matches
         end
       end
