@@ -118,6 +118,12 @@ module Check
       Redis::List.new(positives_key, maxlength: self.fetch(:keep_positives), marshal: true)
     end
 
+    def delete_positives
+      Redis.current.del(positives_key)
+    end
+    # removing all elements from a list is the same as deleting that list altogether
+    alias :clear_positives :delete_positives
+
     def delete_associated
       Redis.current.del([matches_key, positives_key, disable_key])
     end

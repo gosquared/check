@@ -201,6 +201,24 @@ module Check
       end
     end
 
+    describe "#delete_positives" do
+      before do
+        @metric = Metric.new(name: "foo", upper: 10).save
+        (10..13).each { |value| @metric.check({name: "foo", value: value}) }
+        @metric.positives.count.must_be :>, 0
+        @metric.must_be :suspended?
+        @metric.delete_positives
+      end
+
+      it "removes all positives" do
+        @metric.positives.count.must_equal 0
+      end
+
+      it "unsuspends metric checking" do
+        @metric.wont_be :suspended?
+      end
+    end
+
     describe ".defaults" do
       it "overwrite default values" do
         Metric.new.must_equal Metric.defaults
