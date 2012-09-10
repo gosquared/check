@@ -9,7 +9,7 @@ module Check
     error_format :json
     format :json
 
-    KEY = ENV.fetch('CHECK_API_KEY') { false }
+    KEY = ENV.fetch('API_KEY') { false }
 
     helpers do
       def authorize!
