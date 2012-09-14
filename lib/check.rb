@@ -1,8 +1,6 @@
 require 'bundler/setup'
 require 'redis'
 
-require_relative 'check/version'
-
 module Check
   extend self
 
