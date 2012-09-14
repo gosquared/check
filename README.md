@@ -25,7 +25,7 @@ Check the examples directory. To run a specific example:
 
     $ ruby examples/metric_check.rb
 
-NB: you will need to have all gems in `development` group installed.
+NB: you will need to have all gems in the `development` group installed.
 
 ## Benchmarks
 
