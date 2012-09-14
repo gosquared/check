@@ -29,7 +29,7 @@ module Check
     def on_message
       Proc.new do |on|
         on.message do |channel, message|
-          puts "#{channel}: #{MessagePack.unpack(message)}"
+          puts "#{channel}: #{unpack(message)}"
         end
       end
     end
@@ -40,6 +40,10 @@ module Check
           puts "Unsubscribed from ##{channel} (#{subscriptions} subscriptions)"
         end
       end
+    end
+
+    def unpack(message)
+      MessagePack.unpack(message)
     end
 
     def shutdown_gracefully
