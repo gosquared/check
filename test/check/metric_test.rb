@@ -115,8 +115,9 @@ module Check
             @metric.matches.length.must_equal 0
           end
 
-          # Check the before for tips on a quick, manual test
-          it "sends pub/sub notification"
+          it "sends pub/sub notification" do
+            skip "Check the before for tips on a quick, manual test"
+          end
         end
       end
 
