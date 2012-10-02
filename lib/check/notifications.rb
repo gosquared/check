@@ -1,5 +1,5 @@
-require_relative '../check'
-
+require 'bundler/setup'
+require 'check'
 require 'msgpack'
 
 module Check
@@ -44,6 +44,8 @@ module Check
 
     def unpack(message)
       MessagePack.unpack(message)
+    rescue MessagePack::UnpackError
+      puts "#{message.inspect} could not be unpacked by MessagePack"
     end
 
     def shutdown_gracefully

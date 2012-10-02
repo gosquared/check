@@ -48,6 +48,21 @@ If you have the gem repository cloned and want to test out the API:
 
     unicorn -c examples/unicorn.conf.rb examples/config.ru
 
+## Notifications
+
+Check uses redis pub/sub to notify of new positives. There is a
+`Check::Notifications` class which should make it easy to set up and
+configure your own subscriber. It the simplest form, it looks like this:
+
+```ruby
+require 'check/notifications'
+
+Check::Notifications.new
+```
+
+The default notifications subscriber is highly customizable, but if this
+isn't enough, feel free to use it as an example for rolling your own.
+
 ## Contributing
 
 1. Fork it
