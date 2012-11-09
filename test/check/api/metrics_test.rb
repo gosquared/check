@@ -55,11 +55,17 @@ module Check
       end
 
       it "creates a new metric if params are valid" do
-        post("/metrics/", {name: "metric1"})
+        post("/metrics/", { name: "metric1" })
         last_response.content_type.must_equal "application/json"
         last_response.status.must_equal 201
         body.must_equal ["metric1"]
         Metric.find(name: "metric1").must_be :persisted?
+      end
+
+      it "persists values with , as arrays" do
+        post("/metrics", { name: "metric2", emails: "foo@bar.com,baz@qux.com" })
+        metric = Metric.find(name: "metric2").similar.first
+        (%w[foo@bar.com baz@qux.com] - metric.emails).must_equal []
       end
     end
 
@@ -85,7 +91,7 @@ module Check
 
     describe "DELETE /metrics" do
       it "returns 200 if metric doesn't exist" do
-        delete("/metrics", {name: "foo"})
+        delete("/metrics", { name: "foo" })
         last_response.status.must_equal 200
       end
 
@@ -93,7 +99,7 @@ module Check
         Metric.new(name: "foo", lower: 10).save
         Metric.new(name: "foo", lower: 9).save
 
-        delete("/metrics", {name: "foo", lower: 10})
+        delete("/metrics", { name: "foo", lower: 10 })
         last_response.content_type.must_equal "application/json"
         last_response.status.must_equal 200
         Metric.find(name: "foo").similar.size.must_equal 1

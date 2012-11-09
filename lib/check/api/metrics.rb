@@ -13,7 +13,13 @@ module Check
       def metric_params
         params.inject({}) do |result, (k, v)|
           unless (k == "route_info")
-            typecast_value = v.match(/^\d+$/) ? v.to_i : v
+            typecast_value = if v.match(/^\d+$/)
+              v.to_i
+            elsif v.index(',')
+              v.split(',')
+            else
+              v
+            end
             result[k.to_sym] = typecast_value
           end
           result
