@@ -5,7 +5,7 @@ $:.unshift lib unless $:.include?(lib)
 
 Gem::Specification.new do |gem|
   gem.name          = 'check'
-  gem.version       = '0.1.0'
+  gem.version       = '0.2.0'
   gem.authors       = ['Gerhard Lazu']
   gem.email         = ['gerhard@lazu.co.uk']
   gem.description   = 'Redis backed service for monitoring metric data streams against pre-defined thresholds'
@@ -20,11 +20,10 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency 'hashr', '~> 0.0.21'
   gem.add_runtime_dependency 'hiredis', '~> 0.4.5'
   gem.add_runtime_dependency 'msgpack', '~> 0.4.7'
-  gem.add_runtime_dependency 'redis', '~> 3.0.1'
-  gem.add_runtime_dependency 'redis-objects', '~> 0.5.3'
+  gem.add_runtime_dependency 'redis', '~> 3.0.2'
+  gem.add_runtime_dependency 'redis-objects', '~> 0.6.1'
 
   ## API
-  gem.add_runtime_dependency 'grape', '~> 0.2.1'
-  # Requires some fixes first, check the api.rb for more info.
-  # gem.add_runtime_dependency 'grape-swagger', '~> 0.2.1'
+  gem.add_runtime_dependency 'grape', '~> 0.2.2'
+  gem.add_runtime_dependency 'grape-swagger', '~> 0.3.0'
 end
