@@ -45,7 +45,7 @@ module Check
         metric = Metric.new(name: "foo").save
         metric.name = "bar"
         metric.save
-        Redis.current.keys.must_equal %w[foo bar]
+        (%w[foo bar] - Redis.current.keys).must_equal []
       end
     end
 
