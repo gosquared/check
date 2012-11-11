@@ -5,7 +5,7 @@ $:.unshift lib unless $:.include?(lib)
 
 Gem::Specification.new do |gem|
   gem.name          = 'check'
-  gem.version       = '0.2.0'
+  gem.version       = '0.2.1'
   gem.authors       = ['Gerhard Lazu']
   gem.email         = ['gerhard@lazu.co.uk']
   gem.description   = 'Redis backed service for monitoring metric data streams against pre-defined thresholds'

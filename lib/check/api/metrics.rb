@@ -27,16 +27,38 @@ module Check
       end
     end
 
+    resource :metric do
+      desc 'List all matching metric checks'
+      params do
+        optional :name, :type => String, :desc => "Name of metric check"
+      end
+      get do
+        metric_check = Metric.find(metric_params)
+
+        if metric_check.persisted?
+          metric_check.similar.to_json
+        else
+          []
+        end
+      end
+
+      desc 'Delete all matching metric checks'
+      params do
+        requires :name, :type => String, :desc => "Name of metric check"
+      end
+      delete do
+        Metric.delete_all(params[:name])
+      end
+    end
+
     resources :metrics do
       desc 'Create metric check'
+      params do
+        requires :name, :type => String, :desc => "Name of metric check"
+      end
       post '/' do
         metric_check = Metric.new(metric_params).save
-
-        if metric_check.valid?
-          [metric_check.name]
-        else
-          error!({:errors => metric_check.errors}, 409)
-        end
+        [metric_check.name]
       end
 
       desc 'Delete specific metric check'
@@ -45,11 +67,17 @@ module Check
       end
 
       desc 'Delete all matching metric checks'
+      params do
+        requires :name, :type => String, :desc => "Name of metric check"
+      end
       delete '/:name' do
         Metric.delete_all(params[:name])
       end
 
       desc 'List all matching metric checks'
+      params do
+        optional :name, :type => String, :desc => "Name of metric check"
+      end
       get '/:name' do
         metric_check = Metric.find(metric_params)
 

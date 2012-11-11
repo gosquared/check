@@ -30,8 +30,8 @@ module Check
 
       describe "when there are metrics" do
         before do
-          matching_metric = Metric.new(name: "foo").save
-          other_metric = Metric.new(name: "bar").save
+          Metric.new(name: "foo").save
+          Metric.new(name: "bar").save
         end
 
         it "returns only matching ones" do
@@ -42,16 +42,28 @@ module Check
           body.first.fetch('name').must_equal "foo"
         end
       end
+
+      describe "when there are metrics with url-safe characters in their name" do
+        before do
+          Metric.new(name: "foo-bar_baz.qux").save
+          Metric.new(name: "foo.qux").save
+        end
+
+        it "returns only matching ones" do
+          get("/metric", :name => "foo-bar_baz.qux")
+          last_response.content_type.must_equal "application/json"
+          last_response.status.must_equal 200
+          body.size.must_equal 1
+          body.first.fetch('name').must_equal "foo-bar_baz.qux"
+        end
+      end
     end
 
     describe "POST /metrics" do
-      it "returns a 409 if params are invalid" do
+      it "returns a 400 if params are invalid" do
         post("/metrics")
         last_response.content_type.must_equal "application/json"
-        last_response.status.must_equal 409
-        body["errors"].must_equal({
-          'name' => "can't be blank"
-        })
+        last_response.status.must_equal 400
       end
 
       it "creates a new metric if params are valid" do
@@ -85,6 +97,16 @@ module Check
           delete("/metrics/foo")
           last_response.status.must_equal 200
           Redis.current.keys.must_equal ["bar"]
+        end
+      end
+
+      describe "when metric has url-safe name" do
+        it "deletes all similar" do
+          Metric.new(name: "foo-bar_baz.qux").save
+          Metric.new(name: "foo.bar").save
+          delete("/metric", :name => "foo.bar")
+          last_response.status.must_equal 200
+          Redis.current.keys.must_equal ["foo-bar_baz.qux"]
         end
       end
     end
