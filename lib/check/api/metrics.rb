@@ -76,16 +76,10 @@ module Check
 
       desc 'List all matching metric checks'
       params do
-        optional :name, :type => String, :desc => "Name of metric check"
+        requires :name, :type => String, :desc => "Name of metric check"
       end
       get '/:name' do
-        metric_check = Metric.find(metric_params)
-
-        if metric_check.persisted?
-          metric_check.similar.to_json
-        else
-          []
-        end
+        Metric.find(metric_params).similar.to_json
       end
     end
   end

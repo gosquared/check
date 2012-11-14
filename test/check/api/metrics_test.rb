@@ -30,7 +30,7 @@ module Check
 
       describe "when there are metrics" do
         before do
-          Metric.new(name: "foo").save
+          Metric.new(name: "foo", upper: 20).save
           Metric.new(name: "bar").save
         end
 
