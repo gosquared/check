@@ -45,7 +45,7 @@ module Check
 
       describe "when there are metrics with url-safe characters in their name" do
         before do
-          Metric.new(name: "foo-bar_baz.qux").save
+          Metric.new(name: "foo-bar_baz.qux", upper: 20).save
           Metric.new(name: "foo.qux").save
         end
 
