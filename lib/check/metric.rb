@@ -47,6 +47,7 @@ module Check
       define self.defaults.merge(params)
     end
 
+    # TODO this needs to delete all associated keys for ALL metric checks
     def self.delete_all(name)
       Redis.current.del(name)
     end
