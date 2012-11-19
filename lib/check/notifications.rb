@@ -1,6 +1,6 @@
 require 'bundler/setup'
 require 'check'
-require 'msgpack'
+require 'json'
 
 module Check
   class Notifications
@@ -43,9 +43,9 @@ module Check
     end
 
     def unpack(message)
-      MessagePack.unpack(message)
-    rescue MessagePack::UnpackError
-      puts "#{message.inspect} could not be unpacked by MessagePack"
+      JSON.parse(message)
+    rescue JSON::ParserError
+      puts "#{message.inspect} could not be unpacked from JSON"
     end
 
     def shutdown_gracefully
