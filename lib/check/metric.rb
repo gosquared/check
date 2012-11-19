@@ -4,7 +4,7 @@ require 'hashr'
 require 'redis/set'
 require 'redis/list'
 require 'redis/value'
-require 'msgpack'
+require 'json'
 
 module Check
   class Metric < Hashr
@@ -67,12 +67,12 @@ module Check
     end
 
     def pack
-      self.to_hash.to_msgpack
+      self.to_hash.to_json
     end
     alias :packed :pack
 
     def unpack(value)
-      MessagePack.unpack(value)
+      JSON.parse(value)
     end
 
     def save
@@ -171,7 +171,7 @@ module Check
     end
 
     def notify(message)
-      Redis.current.publish(REDIS_NOTIFICATIONS, message.to_msgpack) if notify?
+      Redis.current.publish(REDIS_NOTIFICATIONS, message.to_json) if notify?
     end
 
     def check(params)
