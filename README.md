@@ -1,5 +1,7 @@
 # Check
 
+[![Join the chat at https://gitter.im/gosquared/check](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/gosquared/check?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 [![travis][1]][2]
 
 Redis backed service for monitoring metric data streams against
